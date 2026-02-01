@@ -14,5 +14,5 @@ export default async function Command() {
   await Clipboard.copy(desc.hex);
 
   const warnings = desc.confusionWarnings.length > 0 ? " ⚠" : "";
-  await showHUD(`${desc.detailedDescription} (${desc.hex})${warnings}`);
+  await showHUD(`${desc.basicName} — ${desc.detailedDescription} (${desc.hex})${warnings}`);
 }

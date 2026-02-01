@@ -54,7 +54,27 @@ export function getSaturationDescriptor(s: number): string {
   if (s <= 30) return "muted";
   if (s <= 60) return "moderate";
   if (s <= 85) return "vivid";
-  return "intense";
+  return "bold";
+}
+
+/**
+ * Pick the single most distinguishing qualifier for a color based on HSL.
+ * Prioritizes extreme lightness, then saturation character.
+ */
+export function getBriefQualifier(hsl: HSL): string | null {
+  if (hsl.l <= 5) return null; // "black" handled separately
+  if (hsl.l >= 97) return null; // "white" handled separately
+  if (hsl.s <= 10) return null; // achromatic, handled separately
+
+  // Extreme lightness is the most notable trait
+  if (hsl.l <= 15) return "dark";
+  if (hsl.l >= 85) return "pale";
+
+  // Otherwise, saturation is the most descriptive single trait
+  if (hsl.s <= 30) return "muted";
+  if (hsl.s <= 60) return "soft";
+  if (hsl.s <= 85) return "vivid";
+  return "bold";
 }
 
 export function getHueDescriptor(h: number): string {

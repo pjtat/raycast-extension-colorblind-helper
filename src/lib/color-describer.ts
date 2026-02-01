@@ -1,6 +1,6 @@
 import namer from "color-namer";
 import { simulateColorblind, colorDistance, COLORBLIND_TYPES } from "./colorblind-sim";
-import { rgbToHsl, getLightnessDescriptor, getSaturationDescriptor, getHueDescriptor } from "./hsl-utils";
+import { rgbToHsl, getLightnessDescriptor, getBriefQualifier } from "./hsl-utils";
 import type { ColorDescription, ConfusionWarning, ColorblindSimulation, PickedColor, RGB } from "./types";
 
 /** Threshold for the redmean color distance to trigger a confusion warning. */
@@ -54,7 +54,7 @@ function getNtcName(hex: string): string {
   return results.ntc[0].name.toLowerCase();
 }
 
-/** Build a natural-language description of a color. */
+/** Build a brief natural-language description of a color. */
 function buildDescription(hex: string, rgb: RGB): string {
   const hsl = rgbToHsl(rgb);
 
@@ -66,11 +66,10 @@ function buildDescription(hex: string, rgb: RGB): string {
     return `a ${lightDesc} gray`;
   }
 
-  const lightDesc = getLightnessDescriptor(hsl.l);
-  const satDesc = getSaturationDescriptor(hsl.s);
+  const qualifier = getBriefQualifier(hsl);
   const ntcName = getNtcName(hex);
 
-  return `a ${lightDesc}, ${satDesc} ${ntcName}`;
+  return qualifier ? `a ${qualifier} ${ntcName}` : `a ${ntcName}`;
 }
 
 /** Generate colorblind simulations and confusion warnings. */
