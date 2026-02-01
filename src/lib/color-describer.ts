@@ -57,17 +57,19 @@ function getNtcName(hex: string): string {
 /** Build a brief natural-language description of a color. */
 function buildDescription(hex: string, rgb: RGB): string {
   const hsl = rgbToHsl(rgb);
+  const ntcName = getNtcName(hex);
 
-  // Handle achromatic colors
-  if (hsl.l <= 3) return "black";
-  if (hsl.l >= 97) return "white";
+  // Only use "black"/"white" for truly extreme values
+  if (hsl.l <= 2 && hsl.s <= 5) return "black";
+  if (hsl.l >= 98 && hsl.s <= 5) return "white";
+
+  // Low saturation: use NTC name with lightness qualifier instead of generic "gray"
   if (hsl.s <= 10) {
     const lightDesc = getLightnessDescriptor(hsl.l);
-    return `a ${lightDesc} gray`;
+    return `a ${lightDesc} ${ntcName}`;
   }
 
   const qualifier = getBriefQualifier(hsl);
-  const ntcName = getNtcName(hex);
 
   return qualifier ? `a ${qualifier} ${ntcName}` : `a ${ntcName}`;
 }
