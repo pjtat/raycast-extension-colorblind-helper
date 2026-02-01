@@ -72,10 +72,7 @@ function ColorDetailView({ desc }: { desc: ColorDescription }) {
           <Detail.Metadata.Label title="Description" text={desc.detailedDescription} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Hex" text={desc.hex} />
-          <Detail.Metadata.Label
-            title="RGB"
-            text={`${desc.rgb.r}, ${desc.rgb.g}, ${desc.rgb.b}`}
-          />
+          <Detail.Metadata.Label title="RGB" text={`${desc.rgb.r}, ${desc.rgb.g}, ${desc.rgb.b}`} />
           <Detail.Metadata.Label
             title="HSL"
             text={`${desc.hsl.h}\u00B0, ${desc.hsl.s}%, ${desc.hsl.l}%`}

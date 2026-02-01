@@ -1,7 +1,19 @@
 import namer from "color-namer";
 import { simulateColorblind, colorDistance, COLORBLIND_TYPES } from "./colorblind-sim";
-import { rgbToHsl, getLightnessDescriptor, getBriefQualifier, getSimpleColorName } from "./hsl-utils";
-import type { ColorDescription, ConfusionWarning, ColorblindSimulation, HSL, PickedColor, RGB } from "./types";
+import {
+  rgbToHsl,
+  getLightnessDescriptor,
+  getBriefQualifier,
+  getSimpleColorName,
+} from "./hsl-utils";
+import type {
+  ColorDescription,
+  ConfusionWarning,
+  ColorblindSimulation,
+  HSL,
+  PickedColor,
+  RGB,
+} from "./types";
 
 /** Threshold for the redmean color distance to trigger a confusion warning. */
 const CONFUSION_DISTANCE_THRESHOLD = 50;
@@ -52,18 +64,94 @@ function getBasicName(hsl: HSL): string {
  * Uses a list of known color-word fragments to find word boundaries.
  */
 const COLOR_WORDS = [
-  "light", "dark", "medium", "pale", "deep",
-  "slate", "steel", "royal", "navy", "sky", "powder", "cornflower", "dodger", "midnight",
-  "sea", "spring", "forest", "lawn", "lime", "olive", "dark",
-  "indian", "fire", "brick", "saddle",
-  "sandy", "rosy", "misty", "ghost", "floral", "antique", "blanched", "papaya", "peach",
-  "golden", "lemon",
-  "red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "white", "black",
-  "gray", "grey", "cyan", "magenta", "turquoise", "aqua", "teal", "coral", "salmon",
-  "violet", "orchid", "plum", "lavender", "thistle", "maroon", "crimson", "tomato",
-  "sienna", "chocolate", "peru", "tan", "wheat", "khaki", "beige", "linen", "ivory",
-  "honeydew", "mint", "azure", "alice", "snow", "seashell", "bisque", "moccasin",
-  "puff", "chiffon", "whip", "cream", "drab", "wood", "smoke", "rod",
+  "light",
+  "dark",
+  "medium",
+  "pale",
+  "deep",
+  "slate",
+  "steel",
+  "royal",
+  "navy",
+  "sky",
+  "powder",
+  "cornflower",
+  "dodger",
+  "midnight",
+  "sea",
+  "spring",
+  "forest",
+  "lawn",
+  "lime",
+  "olive",
+  "dark",
+  "indian",
+  "fire",
+  "brick",
+  "saddle",
+  "sandy",
+  "rosy",
+  "misty",
+  "ghost",
+  "floral",
+  "antique",
+  "blanched",
+  "papaya",
+  "peach",
+  "golden",
+  "lemon",
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "orange",
+  "purple",
+  "pink",
+  "brown",
+  "white",
+  "black",
+  "gray",
+  "grey",
+  "cyan",
+  "magenta",
+  "turquoise",
+  "aqua",
+  "teal",
+  "coral",
+  "salmon",
+  "violet",
+  "orchid",
+  "plum",
+  "lavender",
+  "thistle",
+  "maroon",
+  "crimson",
+  "tomato",
+  "sienna",
+  "chocolate",
+  "peru",
+  "tan",
+  "wheat",
+  "khaki",
+  "beige",
+  "linen",
+  "ivory",
+  "honeydew",
+  "mint",
+  "azure",
+  "alice",
+  "snow",
+  "seashell",
+  "bisque",
+  "moccasin",
+  "puff",
+  "chiffon",
+  "whip",
+  "cream",
+  "drab",
+  "wood",
+  "smoke",
+  "rod",
 ];
 
 function splitColorName(name: string): string {
@@ -101,21 +189,21 @@ function getDetailedName(hex: string): string {
 /** Build a brief natural-language description of a color. */
 function buildDescription(hex: string, rgb: RGB): string {
   const hsl = rgbToHsl(rgb);
-  const ntcName = getDetailedName(hex);
+  const colorName = getDetailedName(hex);
 
   // Only use "black"/"white" for truly extreme values
   if (hsl.l <= 2 && hsl.s <= 5) return "black";
   if (hsl.l >= 98 && hsl.s <= 5) return "white";
 
-  // Low saturation: use NTC name with lightness qualifier instead of generic "gray"
+  // Low saturation: use HTML color name with lightness qualifier
   if (hsl.s <= 10) {
     const lightDesc = getLightnessDescriptor(hsl.l);
-    return `a ${lightDesc} ${ntcName}`;
+    return `a ${lightDesc} ${colorName}`;
   }
 
   const qualifier = getBriefQualifier(hsl);
 
-  return qualifier ? `a ${qualifier} ${ntcName}` : `a ${ntcName}`;
+  return qualifier ? `a ${qualifier} ${colorName}` : `a ${colorName}`;
 }
 
 /** Generate colorblind simulations and confusion warnings. */
