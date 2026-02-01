@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Color,
   Detail,
   Icon,
@@ -8,9 +9,10 @@ import {
   closeMainWindow,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { pickColor } from "swift:../swift/color-picker";
 import { describePickedColor, describeRgb, hexToRgb } from "./lib/color-describer";
+import { addToHistory, clearHistory, getHistory, type HistoryEntry } from "./lib/history";
 import type { ColorDescription, PickedColor } from "./lib/types";
 
 function colorDetailMarkdown(desc: ColorDescription): string {
@@ -117,14 +119,38 @@ function ColorDetailView({ desc }: { desc: ColorDescription }) {
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const { push } = useNavigation();
+
+  useEffect(() => {
+    getHistory().then(setHistory);
+  }, []);
+
+  async function refreshHistory() {
+    setHistory(await getHistory());
+  }
 
   async function handlePickColor() {
     await closeMainWindow();
     const color = (await pickColor()) as PickedColor | undefined;
     if (!color) return;
     const desc = describePickedColor(color);
+    await Clipboard.copy(desc.hex);
+    await addToHistory(desc);
+    await refreshHistory();
     push(<ColorDetailView desc={desc} />);
+  }
+
+  async function handleViewHistoryEntry(entry: HistoryEntry) {
+    const rgb = hexToRgb(entry.hex);
+    if (!rgb) return;
+    const desc = describeRgb(rgb);
+    push(<ColorDetailView desc={desc} />);
+  }
+
+  async function handleClearHistory() {
+    await clearHistory();
+    setHistory([]);
   }
 
   function getHexPreview(): ColorDescription | null {
@@ -145,47 +171,82 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       filtering={false}
     >
-      <List.Item
-        title="Pick Color from Screen"
-        subtitle="Use the eyedropper to select any pixel"
-        icon={Icon.EyeDropper}
-        actions={
-          <ActionPanel>
-            <Action title="Pick Color" icon={Icon.EyeDropper} onAction={handlePickColor} />
-          </ActionPanel>
-        }
-      />
-      {preview && (
+      <List.Section title="Actions">
         <List.Item
-          title={preview.detailedDescription}
-          subtitle={preview.hex}
-          icon={{ source: Icon.CircleFilled, tintColor: preview.hex as Color }}
-          accessories={[
-            { text: preview.basicName },
-            ...(preview.confusionWarnings.length > 0
-              ? [{ icon: Icon.ExclamationMark, tooltip: "Has colorblind confusion warnings" }]
-              : []),
-          ]}
+          title="Pick Color from Screen"
+          subtitle="Use the eyedropper to select any pixel"
+          icon={Icon.EyeDropper}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Details"
-                icon={Icon.Eye}
-                target={<ColorDetailView desc={preview} />}
-              />
-              <Action.CopyToClipboard
-                title="Copy Hex"
-                content={preview.hex}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
-              <Action.CopyToClipboard
-                title="Copy Description"
-                content={preview.detailedDescription}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              />
+              <Action title="Pick Color" icon={Icon.EyeDropper} onAction={handlePickColor} />
             </ActionPanel>
           }
         />
+        {preview && (
+          <List.Item
+            title={preview.detailedDescription}
+            subtitle={preview.hex}
+            icon={{ source: Icon.CircleFilled, tintColor: preview.hex as Color }}
+            accessories={[
+              { text: preview.basicName },
+              ...(preview.confusionWarnings.length > 0
+                ? [{ icon: Icon.ExclamationMark, tooltip: "Has colorblind confusion warnings" }]
+                : []),
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View Details"
+                  icon={Icon.Eye}
+                  target={<ColorDetailView desc={preview} />}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Hex"
+                  content={preview.hex}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Description"
+                  content={preview.detailedDescription}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+      </List.Section>
+      {history.length > 0 && (
+        <List.Section title="History">
+          {history.map((entry) => (
+            <List.Item
+              key={`${entry.hex}-${entry.timestamp}`}
+              title={`${entry.basicName} — ${entry.detailedDescription}`}
+              subtitle={entry.hex}
+              icon={{ source: Icon.CircleFilled, tintColor: entry.hex as Color }}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="View Details"
+                    icon={Icon.Eye}
+                    onAction={() => handleViewHistoryEntry(entry)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Hex"
+                    content={entry.hex}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action
+                    title="Clear History"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={handleClearHistory}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       )}
     </List>
   );
