@@ -154,10 +154,11 @@ export default function Command() {
   }
 
   function getHexPreview(): ColorDescription | null {
-    const clean = searchText.trim();
-    if (clean.length < 3) return null;
-    const normalized = clean.startsWith("#") ? clean : `#${clean}`;
-    const rgb = hexToRgb(normalized);
+    const clean = searchText.trim().replace(/^#/, "");
+    // Only show preview for complete 6-digit hex codes
+    if (clean.length !== 6) return null;
+    if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null;
+    const rgb = hexToRgb(`#${clean}`);
     if (!rgb) return null;
     return describeRgb(rgb);
   }

@@ -62,8 +62,9 @@ export function getSaturationDescriptor(s: number): string {
  * Prioritizes extreme lightness, then saturation character.
  */
 export function getBriefQualifier(hsl: HSL): string | null {
-  if (hsl.l <= 5) return null; // "black" handled separately
-  if (hsl.l >= 97) return null; // "white" handled separately
+  // These match buildDescription's thresholds for black/white/achromatic
+  if (hsl.l <= 2 && hsl.s <= 5) return null;
+  if (hsl.l >= 98 && hsl.s <= 5) return null;
   if (hsl.s <= 10) return null; // achromatic, handled separately
 
   // Extreme lightness is the most notable trait
@@ -77,7 +78,29 @@ export function getBriefQualifier(hsl: HSL): string | null {
   return "bold";
 }
 
-export function getHueDescriptor(h: number): string {
+/**
+ * Get a simple, intuitive color name from HSL values.
+ * Uses hue for chromatic colors, with special handling for browns and grays.
+ */
+export function getSimpleColorName(hsl: HSL): string {
+  // Achromatic
+  if (hsl.s <= 10) {
+    if (hsl.l <= 10) return "black";
+    if (hsl.l >= 90) return "white";
+    return "gray";
+  }
+
+  // Very dark with low saturation → effectively black
+  if (hsl.l <= 5) return "black";
+  // Very light with low saturation → effectively white
+  if (hsl.l >= 95) return "white";
+
+  const { h, s, l } = hsl;
+
+  // Brown: warm hues (red-orange-yellow) that are dark and not highly saturated
+  if ((h < 45 || h >= 345) && l < 40 && s < 70) return "brown";
+
+  // Hue-based names
   if (h < 15 || h >= 345) return "red";
   if (h < 45) return "orange";
   if (h < 70) return "yellow";

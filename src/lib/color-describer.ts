@@ -1,7 +1,7 @@
 import namer from "color-namer";
 import { simulateColorblind, colorDistance, COLORBLIND_TYPES } from "./colorblind-sim";
-import { rgbToHsl, getLightnessDescriptor, getBriefQualifier, getHueDescriptor } from "./hsl-utils";
-import type { ColorDescription, ConfusionWarning, ColorblindSimulation, PickedColor, RGB } from "./types";
+import { rgbToHsl, getLightnessDescriptor, getBriefQualifier, getSimpleColorName } from "./hsl-utils";
+import type { ColorDescription, ConfusionWarning, ColorblindSimulation, HSL, PickedColor, RGB } from "./types";
 
 /** Threshold for the redmean color distance to trigger a confusion warning. */
 const CONFUSION_DISTANCE_THRESHOLD = 50;
@@ -42,19 +42,9 @@ export function hexToRgb(hex: string): RGB | null {
   return { r, g, b };
 }
 
-/** Get the basic color name from a hex string. */
-function getBasicName(hex: string, rgb: RGB): string {
-  const results = namer(hex, { pick: ["basic"] });
-  const name = results.basic[0].name.toLowerCase();
-
-  // The basic palette only has ~20 colors, so dark chromatic colors
-  // get matched to "black" and very light ones to "white". Override
-  // with the hue name when the color has meaningful saturation.
-  if ((name === "black" || name === "white") && rgbToHsl(rgb).s > 15) {
-    return getHueDescriptor(rgbToHsl(rgb).h);
-  }
-
-  return name;
+/** Get the simple color name from HSL values. */
+function getBasicName(hsl: HSL): string {
+  return getSimpleColorName(hsl);
 }
 
 /** Get the detailed NTC color name from a hex string. */
@@ -94,7 +84,8 @@ function getColorblindInfo(
   for (const { type, label } of COLORBLIND_TYPES) {
     const simRgb = simulateColorblind(rgb, type);
     const simHex = rgbToHex(simRgb);
-    const simBasicName = getBasicName(simHex, simRgb);
+    const simHsl = rgbToHsl(simRgb);
+    const simBasicName = getBasicName(simHsl);
 
     simulations.push({ type, label, hex: simHex, basicName: simBasicName });
 
@@ -121,7 +112,7 @@ export function describePickedColor(color: PickedColor): ColorDescription {
 export function describeRgb(rgb: RGB): ColorDescription {
   const hex = rgbToHex(rgb);
   const hsl = rgbToHsl(rgb);
-  const basicName = getBasicName(hex, rgb);
+  const basicName = getBasicName(hsl);
   const detailedName = getNtcName(hex);
   const detailedDescription = buildDescription(hex, rgb);
   const { simulations, warnings } = getColorblindInfo(rgb, basicName);
