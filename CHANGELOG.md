@@ -1,4 +1,4 @@
-## Initial Version {PR_MERGE_DATE}
+## Initial Version
 
 - Pick any color from the screen with the native macOS eyedropper
 - Get simple and detailed color descriptions
