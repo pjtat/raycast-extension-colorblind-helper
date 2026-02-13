@@ -19,3 +19,7 @@ dist
 
 # macOS
 .DS_Store
+assets/compiled_raycast_swift/
+swift/color-picker/.raycast-swift-build/
+swift/color-picker/Package.resolved
+raycast-env.d.ts
