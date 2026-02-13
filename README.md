@@ -2,6 +2,10 @@
 
 Pick any color from your screen and get a human-readable description with colorblind simulation.
 
+![Colorblind Helper Demo](metadata/colorblindhelper.gif)
+
+![Colorblind Helper Screenshot](metadata/Screenshot.png)
+
 ## Features
 
 - **Pick Color from Screen** — Use the native macOS eyedropper to select any pixel. The hex code is automatically copied to your clipboard.
