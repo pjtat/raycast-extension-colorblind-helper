@@ -6,7 +6,6 @@ import {
   Detail,
   Icon,
   List,
-  closeMainWindow,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -128,7 +127,6 @@ export default function Command() {
   }
 
   async function handlePickColor() {
-    await closeMainWindow();
     const color = (await pickColor()) as PickedColor | undefined;
     if (!color) return;
     const desc = describePickedColor(color);

@@ -50,8 +50,8 @@ export function simulateColorblind(rgb: RGB, type: ColorblindType): RGB {
 }
 
 /**
- * Calculate the perceptual color difference (CIE76 delta E in Lab space, simplified).
- * Returns a value where 0 = identical, >30 = very different colors.
+ * Calculate the perceptual color difference using the redmean approximation in RGB space.
+ * Returns a value where 0 = identical, >50 = very different colors.
  */
 export function colorDistance(a: RGB, b: RGB): number {
   // Use a simple weighted Euclidean distance in RGB space

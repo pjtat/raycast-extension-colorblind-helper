@@ -18,7 +18,7 @@ import type {
 /** Threshold for the redmean color distance to trigger a confusion warning. */
 const CONFUSION_DISTANCE_THRESHOLD = 50;
 
-/** Convert P3 float (0-1) color components to sRGB 0-255. */
+/** Convert sRGB float (0-1) color components to sRGB 0-255. */
 function pickedColorToRgb(color: PickedColor): RGB {
   return {
     r: Math.round(Math.max(0, Math.min(255, color.red * 255))),
